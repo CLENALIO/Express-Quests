@@ -1,6 +1,7 @@
 const express = require("express");
 
 const app = express();
+app.use(express.json());
 
 const port = 5000;
 
@@ -14,6 +15,8 @@ const userHandlers = require("./userHandlers");
 
 app.get("/api/users", userHandlers.getUsers);
 app.get("/api/users/:id", userHandlers.getUsersById);
+
+app.post("/api/users", userHandlers.postUser);
 
 app.listen(port, (err) => {
   if (err) {
