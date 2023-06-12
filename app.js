@@ -25,9 +25,13 @@ const { validateUser } = require("./validators.js");
 app.get("/api/users", userHandlers.getUsers);
 app.get("/api/users/:id", userHandlers.getUsersById);
 
-app.post("/api/users", validateUser, userHandlers.postUser);
+//app.post("/api/users", validateUser, userHandlers.postUser);
+//app.put("/api/users/:id", validateUser, userHandlers.updateUser);
 
-app.put("/api/users/:id", validateUser, userHandlers.updateUser);
+const { hashPassword } = require("./auth.js");
+
+app.post("/api/users", hashPassword, validateUser, userHandlers.postUser);
+app.put("/api/users/:id", hashPassword, validateUser, userHandlers.updateUser);
 
 app.delete("/api/users/:id", userHandlers.deleteUser);
 
@@ -43,5 +47,9 @@ app.post("/api/movies", validateMovie, movieHandlers.postMovie);
 app.put("/api/movies/:id", validateMovie, movieHandlers.updateMovie);
 
 app.delete("/api/movies/:id", movieHandlers.deleteMovie);
+
+
+
+
 
 
