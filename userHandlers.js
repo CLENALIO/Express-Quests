@@ -46,6 +46,26 @@ const getUsersById = (req, res) => {
   });
 };
 
+const getUserByEmailWithPasswordAndPassToNext = (req, res, next) => {
+  const { email } = req.body;
+
+  database
+    .query("select * from users where email = ?", [email])
+    .then(([users]) => {
+      if (users[0] != null) {
+        req.user = users[0];
+
+        next();
+      } else {
+        res.sendStatus(401);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error retrieving data from database");
+    });
+};
+
 const postUser = (req, res) => {
 
   const {firstname, lastname, email, city, language, hashedPassword} = req.body
@@ -67,6 +87,7 @@ const postUser = (req, res) => {
 const updateUser = (req, res) => {
 
   const id = parseInt(req.params.id);
+  const idSub = parseInt(req.payload.sub);
   const {firstname, lastname, email, city, language, hashedPassword} = req.body
 
   database
@@ -74,11 +95,18 @@ const updateUser = (req, res) => {
       "UPDATE users SET firstname = ?, lastname = ?, email = ?, city = ?, language = ?, hashedPassword = ? WHERE id=?", [firstname, lastname, email, city, language, hashedPassword, id]
     )
     .then(([result]) => {
+
+      if (id !== idSub) {
+        res.status(403).send("Forbidden");
+      }
+      else {
+
       if (result.affectedRows === 0) {
         res.status(404).send("Not Found");
       } else {
         res.sendStatus(204);
       }
+    }
     })
     .catch((err) => {
       console.error(err);
@@ -90,17 +118,24 @@ const updateUser = (req, res) => {
 const deleteUser = (req, res) => {
 
   const id = parseInt(req.params.id);
+  const idSub = parseInt(req.payload.sub);
 
   database
     .query(
       "DELETE FROM users WHERE id=?", [id]
     )
     .then(([result]) => {
+      if (id !== idSub) {
+        res.status(403).send("Forbidden");
+      }
+      else {
+
       if (result.affectedRows === 0) {
         res.status(404).send("Not Found");
       } else {
         res.sendStatus(204);
       }
+    }
     })
     .catch((err) => {
       console.error(err);
@@ -116,4 +151,5 @@ module.exports = {
   postUser,
   updateUser,
   deleteUser,
+  getUserByEmailWithPasswordAndPassToNext,
 };
